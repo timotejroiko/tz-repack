@@ -40,6 +40,7 @@ async function update() {
         await download(latest);
         console.log(("Begin compilation"));
         await compile(latest);
+        await fs.copyFile(`${builddir}/${latest}.json`, `${builddir}/latest.json`);
         console.log(("Done"));
     } else {
         console.log(`Current version is up to date: ${current}`);
@@ -88,7 +89,7 @@ async function compile(version) {
     });
     console.log(`Compiling timezone files...`);
     const files = ["africa", "antarctica", "asia", "australasia", "etcetera", "europe", "northamerica", "southamerica", "backward"];
-    await fs.mkdir(`${p}/compiled`);
+    await fs.mkdir(`${p}/compiled`).catch(() => {});
     await Promise.all(files.map(file => new Promise((resolve, reject) => {
         cp.exec(`zic -d ./compiled ./${file}`, { cwd: p }, err => err ? reject(err) : resolve(undefined));
     })));
@@ -183,10 +184,15 @@ async function compile(version) {
         const untillist = [...new Set(untils2.map((x, i) => (i > 0 ? Math.abs(x - untils2[i-1]) : x) / 3600000))];
         final.push({
             name,
-            abbrlist: abbrlist.join("|"),
-            offsetlist: offsetlist.join("|"),
-            untillist: untillist.join("|"),
-            data: untils2.map((x, i) => abbrlist.indexOf(abbrs2[i]).toString(36) + offsetlist.indexOf(offsets2[i]).toString(36) + isdst2[i] + untillist.indexOf((i > 0 ? Math.abs(x - untils2[i-1]) : x) / 3600000).toString(36)).join("|")
+            abbrs: abbrlist,
+            offsets: offsetlist,
+            untils: untillist,
+            data: untils2.map((x, i) => String.fromCodePoint(
+                (abbrlist.indexOf(abbrs2[i]) << 15) +
+                (offsetlist.indexOf(offsets2[i]) << 10) +
+                (isdst2[i] << 9) +
+                untillist.indexOf((i > 0 ? Math.abs(x - untils2[i-1]) : x) / 3600000)
+            )).join("")
         });
     }
     final.sort((a, b) => a.name.localeCompare(b.name));
@@ -195,6 +201,5 @@ async function compile(version) {
         version,
         zones: final
     }));
-    await fs.copyFile(`${builddir}/${version}.json`, `${builddir}/latest.json`);
     console.log("Finished");
 }
