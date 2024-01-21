@@ -22,7 +22,7 @@ jobs:
           node-version: latest
 
       - name: lzip
-        run: apt install lzip
+        run: sudo apt install -y lzip
 
       - id: check
         name: Check for updates
