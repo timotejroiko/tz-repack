@@ -8,13 +8,14 @@ const builddir = "./build";
 
 (async () => {
     try {
+        await fs.mkdir(builddir, { recursive: true }).catch(() => {});
+        await fs.mkdir(workdir, { recursive: true }).catch(() => {});
         if(process.argv[2]) {
             await manual();
         } else {
             await update();
         }
     } finally {
-        console.log(("Cleanup..."));
         await fs.rm(workdir, { recursive: true });
     }
 })();
@@ -23,12 +24,9 @@ async function manual() {
     const target = process.argv[2];
     console.log(`Building ${target}`);
     console.log(("Begin download"));
-    await fs.mkdir(workdir, { recursive: true });
     await download(target);
     console.log(("Begin compilation"));
     await compile(target);
-    console.log(("Cleanup..."));
-    await fs.rm(workdir, { recursive: true });
     console.log(("Done"));
 }
 
@@ -39,12 +37,9 @@ async function update() {
     if(latest !== current) {
         console.log(`Update found: ${current} -> ${latest}`);
         console.log(("Begin download"));
-        await fs.mkdir(workdir, { recursive: true });
         await download(latest);
         console.log(("Begin compilation"));
         await compile(latest);
-        console.log(("Cleanup..."));
-        await fs.rm(workdir, { recursive: true });
         console.log(("Done"));
     } else {
         console.log(`Current version is up to date: ${current}`);
@@ -52,9 +47,9 @@ async function update() {
 }
 
 async function getLocal() {
-    const latest = await fs.readFile(`${builddir}/latest.json`, { encoding: "utf8" });
+    const latest = await fs.readFile(`${builddir}/latest.json`, { encoding: "utf8" }).catch(() => null);
     const json = JSON.parse(latest);
-    return json.version;
+    return json?.version;
 }
 
 async function getRemote() {
@@ -71,7 +66,6 @@ async function download(version) {
     if(response.status !== 200 || !response.body) {
         throw new Error(response.statusText);
     }
-    console.log(`${response.status} ${response.statusText}`);
     const body = /** @type {import("stream/web").ReadableStream} */ (response.body);
     const readable = stream.Readable.fromWeb(body);
     console.log(`Transferring...`);
