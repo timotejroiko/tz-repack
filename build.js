@@ -112,9 +112,7 @@ async function compile(version) {
                 }
             });
         }).then(data => {
-            process.stdout.clearLine(0);
-            process.stdout.cursorTo(0);
-            process.stdout.write(`${`${n++}/${paths.length}`.padEnd(10, " ")}${name}`);
+            console.log(`${`${n++}/${paths.length}`.padEnd(10, " ")}${name}`);
             texts.push({ name, data: data.split("\n").map(x => x.slice(x.indexOf("  ") + 2)).join("\n") });
             concurrency.splice(concurrency.indexOf(promise), 1);
         });
@@ -124,8 +122,6 @@ async function compile(version) {
         }
     }
     await Promise.all(concurrency);
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
     console.log(`Processing data...`);
     first:
     for(let i = 0; i < texts.length; i++) {
@@ -142,9 +138,7 @@ async function compile(version) {
                 continue first;
             }
         }
-        process.stdout.clearLine(0);
-        process.stdout.cursorTo(0);
-        process.stdout.write(`${`${i}/${paths.length}`.padEnd(10, " ")}${name}`);
+        console.log(`${`${i}/${paths.length}`.padEnd(10, " ")}${name}`);
         const lines = data.split("\n");
         const offsets = [];
         const untils = [];
@@ -202,7 +196,5 @@ async function compile(version) {
         zones: final
     }));
     await fs.copyFile(`${builddir}/${version}.json`, `${builddir}/latest.json`);
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
     console.log("Finished");
 }
