@@ -1,0 +1,31 @@
+name: Compile
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js latest
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: npm
+
+      - id: check
+        name: Check for updates
+        run: echo "RESULT=$(node build.js | tail -n 1)" >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        if: steps.check.outputs.RESULT == 'Done'
+        uses: stefanzweifel/git-auto-commit-action@v5
