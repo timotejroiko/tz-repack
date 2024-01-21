@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: latest
 
+      - name: lzip
+        run: apt install lzip
+
       - id: check
         name: Check for updates
         run: echo "RESULT=$(node build.js | tail -n 1)" >> $GITHUB_OUTPUT
