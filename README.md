@@ -9,7 +9,7 @@ This repack includes everything from the original source files, nothing was remo
 * IANA: the original source files maintained by [iana.org](https://iana.org/time-zones)
 * GTZ: alternative source files maintained by [JodaOrg](https://github.com/JodaOrg/global-tz) that aim to restore historical timezones that were lost with the recent IANA changes
 
-Additionally, a daily Github Actions workflow is active in this repo and will automatically repack the next tzdata versions whenever they becomes available.
+Additionally, a daily Github Actions workflow is active in this repo and will automatically repack the next tzdata versions whenever they become available.
 
 ## Format
 
@@ -63,13 +63,19 @@ entry = { // example of a single timeline entry for a given timezone
 
 ## Build file
 
-The `build.js` file contains the entire build process used to create the repacked timezone database files, including downloading, compiling and extracting the timezone data from the raw tzdata files.
+The `build.js` file contains the entire build process used to create the repacked timezone database files, including downloading, compiling and extracting the timezone data from the raw files.
+
+This file is automatically executed once per day via Github Actions in order to check for updates.
+
+The build file is designed for linux only and requires `nodejs`, `gcc`, `make` and `lzip` to be installed in the system.
+
+Windows is not supported.
 
 ## Unpacker file
 
-A small utility class can be found in `unpacker.js`, it should support all platforms including browsers.
+A small utility class for JavaScript users can be found in `unpacker.js`, it should support all platforms including browsers.
 
-Feel free to use it directly, or as an example for how to unpack the packed json format.
+Feel free to use it directly, or as a working example for how to unpack the packed json format.
 
 ```js
 // example
