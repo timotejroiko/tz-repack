@@ -1,11 +1,13 @@
 # tz-repack
 
-Complete IANA timezone database repackaged for easy offline use, packed into a single json file totalling ~660kb raw and ~50kb gzipped.
+Complete IANA timezone database repackaged for easy offline use.
+
+The entire database is packed into a single json file totalling ~660kb raw or ~50kb gzipped.
 
 This repack includes everything from the original source files, nothing was removed or modified, and is currently available in two flavors, IANA and GTZ:
 
 * IANA: the original source files maintained by [iana.org](https://iana.org/time-zones)
-* GTZ: a fork maintained by [JodaOrg](https://github.com/JodaOrg/global-tz) that restores lost historical timezones that were deemed out of scope by IANA
+* GTZ: alternative source files maintained by [JodaOrg](https://github.com/JodaOrg/global-tz) that aim to restore historical timezones that were lost with the recent IANA changes
 
 Additionally, a daily Github Actions workflow is active in this repo and will automatically repack the next tzdata versions whenever they becomes available.
 
