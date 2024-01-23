@@ -1,0 +1,30 @@
+{
+  "name": "tz-repack",
+  "version": "1.0.0",
+  "description": "Complete IANA timezone database repackaged for easy offline use",
+  "main": "unpacker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timotejroiko/tz-repack.git"
+  },
+  "keywords": [
+    "iana",
+    "time",
+    "zone",
+    "timezone",
+    "tz",
+    "tzdata",
+    "tzdb",
+    "globaltz",
+    "jodaorg"
+  ],
+  "author": "Timotej Valentin Rojko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/timotejroiko/tz-repack/issues"
+  },
+  "homepage": "https://github.com/timotejroiko/tz-repack#readme"
+}

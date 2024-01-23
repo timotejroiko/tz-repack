@@ -61,38 +61,66 @@ entry = { // example of a single timeline entry for a given timezone
 }
 ```
 
-Here's a functional JavaScript example to unpack all the data in the json file:
+## Build file
+
+The `build.js` file contains the entire build process used to create the repacked timezone database files, including downloading, compiling and extracting the timezone data from the raw tzdata files.
+
+## Unpacker file
+
+A small utility class can be found in `unpacker.js`, it should support all platforms including browsers.
+
+Feel free to use it directly, or as an example for how to unpack the packed json format.
 
 ```js
-const json = ...; // load json file
+// example
+const Unpacker = require("./unpacker.js");
+const data = require("./2023d.json");
 
-for(const zone of json.zones) {
-    if(zone.link) {
-        continue; // ignore aliases
-    }
-    zone.unpacked = []; // create an array to hold unpacked entries
+const timezone = new Unpacker(data);
+console.log(timezone.getZone("america/new_york"));
+```
 
-    // iterate over each character in the data array
-    for(const char of zone.data) { // in js, for..of iterates over utf16 code points including surrogate pairs, so we can safely use it here
-        const code = char.codePointAt(); // get character code point number
-        const prev = zone.unpacked[zone.unpacked.length - 1]; // get previous entry if exists
+```ts
+// typings
+class TimezoneUnpacker {
+    constructor(data: packedJsonFile)
+    getZone(timezone: string): unpackedTimezoneData
+    getZoneEntry(timezone: string, timestamp: number): unpackedTimezoneEntry
+    hasZone(timezone: string): boolean
+    listZones(): string[]
+    static unpackZone(packedTimezoneData): unpackedTimezoneData
+    static unpackFile(packedJsonfile): unpackedJsonFile
+}
 
-        const abbr_index = code >> 15; // extract abbr index from number
-        const offset_index = (code >> 10) & 31; // extract offset index from number
-        const isdst = (code >> 9) & 1; // extract dst info from number
-        const until_index = code & 511; // extract until index from number
+type packedJsonFile = {
+    version: string,
+    zones: packedTimezoneData[]
+}
 
-        const abbr = zone.abbrs[abbr_index]; // get current abbr
-        const offset = zone.offsets[offset_index]; // get current offset
-        const until = zone.untils[until_index]; // get current until value
-        const realuntil = until === null ? Infinity : until * 3600000 // null means we reached the end of time, so we extend to infinity, otherwise we convert hours to milliseconds
+type packedTimezoneData = {
+    name: string,
+    abbrs: string[],
+    offsets: number[],
+    untils: (number | null)[],
+    data: string
+}
 
-        zone.unpacked.push({
-            abbr,
-            offset,
-            until: prev ? prev.until + realuntil : realuntil, // first until is the starting timestamp, other untils are the cumulative timestamp diffs that need to be added together
-            dst: Boolean(isdst)
-        });
-    }
+type unpackedJsonFile = {
+    version: string,
+    zones: unpackedTimezoneData[],
+    index: Record<string, unpackedTimezoneData>
+}
+
+type unpackedTimezoneData = {
+    name: string,
+    data: unpackedTimezoneEntry[]
+}
+
+type unpackedTimezoneEntry = {
+    abbr: string,
+    offset: number,
+    dst: boolean,
+    from: number,
+    until: number
 }
 ```
