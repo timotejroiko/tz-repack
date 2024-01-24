@@ -26,7 +26,7 @@ jobs:
 
       - id: check
         name: Check for updates
-        run: echo "RESULT=$(node build.js | tee /dev/console | tail -n 1)" >> $GITHUB_OUTPUT
+        run: sudo echo "RESULT=$(node build.js | tee /dev/console | tail -n 1)" >> $GITHUB_OUTPUT
 
       - name: Commit changes
         if: steps.check.outputs.RESULT == 'Done'
