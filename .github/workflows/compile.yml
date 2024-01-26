@@ -14,19 +14,19 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Use Node.js latest
         uses: actions/setup-node@v3
         with:
           node-version: latest
+
+      - uses: actions/checkout@v4
 
       - name: lzip
         run: sudo apt install -y lzip
 
       - id: check
         name: Check for updates
-        run: sudo echo "RESULT=$(node build.js | tee /dev/console | tail -n 1)" >> $GITHUB_OUTPUT
+        run: echo "RESULT=$(node build.js | tee /dev/tty | tail -n 1)" >> $GITHUB_OUTPUT
 
       - name: Commit changes
         if: steps.check.outputs.RESULT == 'Done'
