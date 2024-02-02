@@ -1,0 +1,612 @@
+Checking for IANA updates...
+Update found: IANA 2023d -> IANA 2024a
+Begin download
+Fetching https://data.iana.org/time-zones/releases/tzdb-2024a.tar.lz
+Downloading file
+Extracting data
+Finished
+Begin compilation
+Compiling binaries
+Compiling timezone files
+Collecting data...
+1/596     Cuba (link to America/Havana)
+2/596     Egypt (link to Africa/Cairo)
+3/596     Eire (link to Europe/Dublin)
+4/596     GB (link to Europe/London)
+5/596     GB-Eire (link to Europe/London)
+6/596     GMT (link to Etc/GMT)
+7/596     GMT+0 (link to Etc/GMT)
+8/596     GMT-0 (link to Etc/GMT)
+9/596     GMT0 (link to Etc/GMT)
+10/596    Greenwich (link to Etc/GMT)
+11/596    Hongkong (link to Asia/Hong_Kong)
+12/596    Iceland (link to Africa/Abidjan)
+13/596    Iran (link to Asia/Tehran)
+14/596    Israel (link to Asia/Jerusalem)
+15/596    Jamaica (link to America/Jamaica)
+16/596    Japan (link to Asia/Tokyo)
+17/596    Kwajalein (link to Pacific/Kwajalein)
+18/596    Libya (link to Africa/Tripoli)
+19/596    NZ (link to Pacific/Auckland)
+20/596    NZ-CHAT (link to Pacific/Chatham)
+21/596    Navajo (link to America/Denver)
+22/596    PRC (link to Asia/Shanghai)
+23/596    HST
+24/596    Poland (link to Europe/Warsaw)
+25/596    Portugal (link to Europe/Lisbon)
+26/596    ROC (link to Asia/Taipei)
+27/596    ROK (link to Asia/Seoul)
+28/596    Singapore (link to Asia/Singapore)
+29/596    Turkey (link to Europe/Istanbul)
+30/596    UCT (link to Etc/UTC)
+31/596    UTC (link to Etc/UTC)
+32/596    Universal (link to Etc/UTC)
+33/596    W-SU (link to Europe/Moscow)
+34/596    EST
+35/596    Zulu (link to Etc/UTC)
+36/596    US/Alaska (link to America/Anchorage)
+37/596    US/Aleutian (link to America/Adak)
+38/596    US/Arizona (link to America/Phoenix)
+39/596    US/Central (link to America/Chicago)
+40/596    US/East-Indiana (link to America/Indiana/Indianapolis)
+41/596    US/Eastern (link to America/New_York)
+42/596    US/Hawaii (link to Pacific/Honolulu)
+43/596    US/Indiana-Starke (link to America/Indiana/Knox)
+44/596    US/Michigan (link to America/Detroit)
+45/596    US/Mountain (link to America/Denver)
+46/596    US/Pacific (link to America/Los_Angeles)
+47/596    US/Samoa (link to Pacific/Pago_Pago)
+48/596    MST
+49/596    EST5EDT
+50/596    MET
+51/596    CET
+52/596    Pacific/Chuuk (link to Pacific/Port_Moresby)
+53/596    Pacific/Apia
+54/596    PST8PDT
+55/596    Pacific/Enderbury (link to Pacific/Kanton)
+56/596    CST6CDT
+57/596    MST7MDT
+58/596    Pacific/Funafuti (link to Pacific/Tarawa)
+59/596    EET
+60/596    Pacific/Auckland
+61/596    Pacific/Bougainville
+62/596    WET
+63/596    Pacific/Efate
+64/596    Pacific/Johnston (link to Pacific/Honolulu)
+65/596    Pacific/Fakaofo
+66/596    Pacific/Fiji
+67/596    Pacific/Galapagos
+68/596    Pacific/Gambier
+69/596    Pacific/Majuro (link to Pacific/Tarawa)
+70/596    Pacific/Guadalcanal
+71/596    Pacific/Midway (link to Pacific/Pago_Pago)
+72/596    Pacific/Guam
+73/596    Pacific/Easter
+74/596    Pacific/Kiritimati
+75/596    Pacific/Marquesas
+76/596    Pacific/Honolulu
+77/596    Pacific/Kanton
+78/596    Pacific/Kosrae
+79/596    Pacific/Pohnpei (link to Pacific/Guadalcanal)
+80/596    Pacific/Ponape (link to Pacific/Guadalcanal)
+81/596    Pacific/Kwajalein
+82/596    Pacific/Chatham
+83/596    Pacific/Saipan (link to Pacific/Guam)
+84/596    Pacific/Samoa (link to Pacific/Pago_Pago)
+85/596    Pacific/Nauru
+86/596    Pacific/Niue
+87/596    Pacific/Palau
+88/596    Pacific/Truk (link to Pacific/Port_Moresby)
+89/596    Pacific/Wake (link to Pacific/Tarawa)
+90/596    Pacific/Wallis (link to Pacific/Tarawa)
+91/596    Pacific/Yap (link to Pacific/Port_Moresby)
+92/596    Mexico/BajaNorte (link to America/Tijuana)
+93/596    Mexico/BajaSur (link to America/Mazatlan)
+94/596    Mexico/General (link to America/Mexico_City)
+95/596    Indian/Antananarivo (link to Africa/Nairobi)
+96/596    Pacific/Pitcairn
+97/596    Indian/Christmas (link to Asia/Bangkok)
+98/596    Indian/Cocos (link to Asia/Yangon)
+99/596    Indian/Comoro (link to Africa/Nairobi)
+100/596   Indian/Kerguelen (link to Indian/Maldives)
+101/596   Indian/Mahe (link to Asia/Dubai)
+102/596   Pacific/Noumea
+103/596   Pacific/Pago_Pago
+104/596   Indian/Mayotte (link to Africa/Nairobi)
+105/596   Indian/Reunion (link to Asia/Dubai)
+106/596   Europe/Amsterdam (link to Europe/Brussels)
+107/596   Pacific/Tahiti
+108/596   Pacific/Port_Moresby
+109/596   Pacific/Tarawa
+110/596   Europe/Belfast (link to Europe/London)
+111/596   Pacific/Rarotonga
+112/596   Pacific/Norfolk
+113/596   Europe/Bratislava (link to Europe/Prague)
+114/596   Indian/Maldives
+115/596   Pacific/Tongatapu
+116/596   Indian/Chagos
+117/596   Europe/Busingen (link to Europe/Zurich)
+118/596   Indian/Mauritius
+119/596   Europe/Copenhagen (link to Europe/Berlin)
+120/596   Europe/Astrakhan
+121/596   Europe/Andorra
+122/596   Europe/Guernsey (link to Europe/London)
+123/596   Europe/Athens
+124/596   Europe/Isle_of_Man (link to Europe/London)
+125/596   Europe/Berlin
+126/596   Europe/Jersey (link to Europe/London)
+127/596   Europe/Belgrade
+128/596   Europe/Kiev (link to Europe/Kyiv)
+129/596   Europe/Brussels
+130/596   Europe/Chisinau
+131/596   Europe/Budapest
+132/596   Europe/Ljubljana (link to Europe/Belgrade)
+133/596   Europe/Bucharest
+134/596   Europe/Luxembourg (link to Europe/Brussels)
+135/596   Europe/Dublin
+136/596   Europe/Istanbul
+137/596   Europe/Mariehamn (link to Europe/Helsinki)
+138/596   Europe/Kaliningrad
+139/596   Europe/Monaco (link to Europe/Paris)
+140/596   Europe/Gibraltar
+141/596   Europe/Nicosia (link to Asia/Nicosia)
+142/596   Europe/Oslo (link to Europe/Berlin)
+143/596   Europe/Kirov
+144/596   Europe/Podgorica (link to Europe/Belgrade)
+145/596   Europe/Helsinki
+146/596   Europe/Moscow
+147/596   Europe/Minsk
+148/596   Europe/Lisbon
+149/596   Europe/San_Marino (link to Europe/Rome)
+150/596   Europe/Sarajevo (link to Europe/Belgrade)
+151/596   Europe/Kyiv
+152/596   Europe/London
+153/596   Europe/Skopje (link to Europe/Belgrade)
+154/596   Europe/Madrid
+155/596   Europe/Stockholm (link to Europe/Berlin)
+156/596   Europe/Malta
+157/596   Europe/Prague
+158/596   Europe/Tiraspol (link to Europe/Chisinau)
+159/596   Europe/Paris
+160/596   Europe/Uzhgorod (link to Europe/Kyiv)
+161/596   Europe/Vaduz (link to Europe/Zurich)
+162/596   Europe/Vatican (link to Europe/Rome)
+163/596   Europe/Samara
+164/596   Europe/Saratov
+165/596   Europe/Simferopol
+166/596   Europe/Rome
+167/596   Europe/Zagreb (link to Europe/Belgrade)
+168/596   Europe/Zaporozhye (link to Europe/Kyiv)
+169/596   Europe/Riga
+170/596   Europe/Ulyanovsk
+171/596   Etc/GMT+0 (link to Etc/GMT)
+172/596   Europe/Volgograd
+173/596   Europe/Sofia
+174/596   Europe/Tirane
+175/596   Europe/Tallinn
+176/596   Etc/GMT
+177/596   Etc/GMT+1
+178/596   Europe/Vienna
+179/596   Etc/GMT+10
+180/596   Etc/GMT+11
+181/596   Etc/GMT+12
+182/596   Etc/GMT+3
+183/596   Europe/Vilnius
+184/596   Etc/GMT-0 (link to Etc/GMT)
+185/596   Etc/GMT+2
+186/596   Europe/Warsaw
+187/596   Etc/GMT+4
+188/596   Etc/GMT+5
+189/596   Etc/GMT+6
+190/596   Europe/Zurich
+191/596   Etc/GMT+7
+192/596   Etc/GMT+8
+193/596   Etc/GMT+9
+194/596   Etc/GMT-10
+195/596   Etc/GMT-1
+196/596   Etc/GMT-12
+197/596   Etc/GMT-11
+198/596   Etc/GMT-13
+199/596   Etc/GMT0 (link to Etc/GMT)
+200/596   Etc/Greenwich (link to Etc/GMT)
+201/596   Etc/UCT (link to Etc/UTC)
+202/596   Etc/GMT-14
+203/596   Etc/Universal (link to Etc/UTC)
+204/596   Etc/Zulu (link to Etc/UTC)
+205/596   Chile/Continental (link to America/Santiago)
+206/596   Chile/EasterIsland (link to Pacific/Easter)
+207/596   Canada/Atlantic (link to America/Halifax)
+208/596   Canada/Central (link to America/Winnipeg)
+209/596   Canada/Eastern (link to America/Toronto)
+210/596   Canada/Mountain (link to America/Edmonton)
+211/596   Canada/Newfoundland (link to America/St_Johns)
+212/596   Canada/Pacific (link to America/Vancouver)
+213/596   Canada/Saskatchewan (link to America/Regina)
+214/596   Canada/Yukon (link to America/Whitehorse)
+215/596   Brazil/Acre (link to America/Rio_Branco)
+216/596   Brazil/DeNoronha (link to America/Noronha)
+217/596   Brazil/East (link to America/Sao_Paulo)
+218/596   Brazil/West (link to America/Manaus)
+219/596   Australia/ACT (link to Australia/Sydney)
+220/596   Etc/GMT-4
+221/596   Etc/GMT-2
+222/596   Etc/GMT-5
+223/596   Australia/Canberra (link to Australia/Sydney)
+224/596   Australia/Currie (link to Australia/Hobart)
+225/596   Etc/GMT-7
+226/596   Etc/GMT-3
+227/596   Etc/GMT-9
+228/596   Australia/LHI (link to Australia/Lord_Howe)
+229/596   Etc/GMT-6
+230/596   Etc/GMT-8
+231/596   Etc/UTC
+232/596   Australia/NSW (link to Australia/Sydney)
+233/596   Australia/North (link to Australia/Darwin)
+234/596   Australia/Brisbane
+235/596   Australia/Queensland (link to Australia/Brisbane)
+236/596   Australia/South (link to Australia/Adelaide)
+237/596   Australia/Eucla
+238/596   Australia/Tasmania (link to Australia/Hobart)
+239/596   Australia/Victoria (link to Australia/Melbourne)
+240/596   Australia/West (link to Australia/Perth)
+241/596   Australia/Yancowinna (link to Australia/Broken_Hill)
+242/596   Australia/Lindeman
+243/596   Australia/Darwin
+244/596   Australia/Perth
+245/596   Australia/Hobart
+246/596   Atlantic/Faeroe (link to Atlantic/Faroe)
+247/596   Australia/Adelaide
+248/596   Atlantic/Jan_Mayen (link to Europe/Berlin)
+249/596   Australia/Broken_Hill
+250/596   Atlantic/Reykjavik (link to Africa/Abidjan)
+251/596   Australia/Melbourne
+252/596   Atlantic/St_Helena (link to Africa/Abidjan)
+253/596   Australia/Lord_Howe
+254/596   Asia/Aden (link to Asia/Riyadh)
+255/596   Atlantic/Cape_Verde
+256/596   Australia/Sydney
+257/596   Atlantic/South_Georgia
+258/596   Atlantic/Canary
+259/596   Atlantic/Bermuda
+260/596   Asia/Almaty
+261/596   Asia/Ashkhabad (link to Asia/Ashgabat)
+262/596   Atlantic/Azores
+263/596   Asia/Amman
+264/596   Asia/Bahrain (link to Asia/Qatar)
+265/596   Atlantic/Stanley
+266/596   Atlantic/Faroe
+267/596   Asia/Anadyr
+268/596   Atlantic/Madeira
+269/596   Asia/Aqtobe
+270/596   Asia/Brunei (link to Asia/Kuching)
+271/596   Asia/Calcutta (link to Asia/Kolkata)
+272/596   Asia/Ashgabat
+273/596   Asia/Aqtau
+274/596   Asia/Chongqing (link to Asia/Shanghai)
+275/596   Asia/Chungking (link to Asia/Shanghai)
+276/596   Asia/Bangkok
+277/596   Asia/Dacca (link to Asia/Dhaka)
+278/596   Asia/Atyrau
+279/596   Asia/Baku
+280/596   Asia/Baghdad
+281/596   Asia/Barnaul
+282/596   Asia/Chita
+283/596   Asia/Bishkek
+284/596   Asia/Choibalsan
+285/596   Asia/Harbin (link to Asia/Shanghai)
+286/596   Asia/Damascus
+287/596   Asia/Dubai
+288/596   Asia/Dili
+289/596   Asia/Colombo
+290/596   Asia/Dhaka
+291/596   Asia/Istanbul (link to Europe/Istanbul)
+292/596   Asia/Beirut
+293/596   Asia/Dushanbe
+294/596   Asia/Ho_Chi_Minh
+295/596   Asia/Hong_Kong
+296/596   Asia/Hovd
+297/596   Asia/Jakarta
+298/596   Asia/Kashgar (link to Asia/Urumqi)
+299/596   Asia/Irkutsk
+300/596   Asia/Katmandu (link to Asia/Kathmandu)
+301/596   Asia/Jayapura
+302/596   Asia/Gaza
+303/596   Asia/Famagusta
+304/596   Asia/Kuala_Lumpur (link to Asia/Singapore)
+305/596   Asia/Hebron
+306/596   Asia/Kuwait (link to Asia/Riyadh)
+307/596   Asia/Macao (link to Asia/Macau)
+308/596   Asia/Kabul
+309/596   Asia/Kamchatka
+310/596   Asia/Kathmandu
+311/596   Asia/Karachi
+312/596   Asia/Muscat (link to Asia/Dubai)
+313/596   Asia/Khandyga
+314/596   Asia/Jerusalem
+315/596   Asia/Kolkata
+316/596   Asia/Kuching
+317/596   Asia/Krasnoyarsk
+318/596   Asia/Phnom_Penh (link to Asia/Bangkok)
+319/596   Asia/Macau
+320/596   Asia/Makassar
+321/596   Asia/Magadan
+322/596   Asia/Manila
+323/596   Asia/Novokuznetsk
+324/596   Asia/Rangoon (link to Asia/Yangon)
+325/596   Asia/Novosibirsk
+326/596   Asia/Saigon (link to Asia/Ho_Chi_Minh)
+327/596   Asia/Omsk
+328/596   Asia/Pyongyang
+329/596   Asia/Pontianak
+330/596   Asia/Oral
+331/596   Asia/Qatar
+332/596   Asia/Qostanay
+333/596   Asia/Qyzylorda
+334/596   Asia/Nicosia
+335/596   Asia/Riyadh
+336/596   Asia/Seoul
+337/596   Asia/Tel_Aviv (link to Asia/Jerusalem)
+338/596   Asia/Thimbu (link to Asia/Thimphu)
+339/596   Asia/Sakhalin
+340/596   Asia/Singapore
+341/596   Asia/Samarkand
+342/596   Asia/Ujung_Pandang (link to Asia/Makassar)
+343/596   Asia/Shanghai
+344/596   Asia/Ulan_Bator (link to Asia/Ulaanbaatar)
+345/596   Asia/Srednekolymsk
+346/596   Asia/Tbilisi
+347/596   Asia/Vientiane (link to Asia/Bangkok)
+348/596   Asia/Tashkent
+349/596   Asia/Tehran
+350/596   Asia/Taipei
+351/596   Asia/Thimphu
+352/596   Asia/Tokyo
+353/596   Arctic/Longyearbyen (link to Europe/Berlin)
+354/596   Asia/Urumqi
+355/596   Asia/Tomsk
+356/596   Antarctica/DumontDUrville (link to Pacific/Port_Moresby)
+357/596   Asia/Ulaanbaatar
+358/596   Asia/Yangon
+359/596   Antarctica/McMurdo (link to Pacific/Auckland)
+360/596   Asia/Ust-Nera
+361/596   Asia/Vladivostok
+362/596   Antarctica/South_Pole (link to Pacific/Auckland)
+363/596   Antarctica/Syowa (link to Asia/Riyadh)
+364/596   Asia/Yakutsk
+365/596   Asia/Yekaterinburg
+366/596   Asia/Yerevan
+367/596   Antarctica/Casey
+368/596   America/Anguilla (link to America/Puerto_Rico)
+369/596   America/Antigua (link to America/Puerto_Rico)
+370/596   Antarctica/Davis
+371/596   America/Aruba (link to America/Puerto_Rico)
+372/596   Antarctica/Mawson
+373/596   America/Atikokan (link to America/Panama)
+374/596   America/Atka (link to America/Adak)
+375/596   Antarctica/Rothera
+376/596   Antarctica/Palmer
+377/596   Antarctica/Vostok
+378/596   America/Araguaina
+379/596   Antarctica/Macquarie
+380/596   America/Blanc-Sablon (link to America/Puerto_Rico)
+381/596   America/Bahia
+382/596   America/Barbados
+383/596   America/Bahia_Banderas
+384/596   America/Buenos_Aires (link to America/Argentina/Buenos_Aires)
+385/596   America/Anchorage
+386/596   America/Adak
+387/596   Antarctica/Troll
+388/596   America/Belem
+389/596   America/Catamarca (link to America/Argentina/Catamarca)
+390/596   America/Belize
+391/596   America/Cayman (link to America/Panama)
+392/596   America/Boa_Vista
+393/596   America/Bogota
+394/596   America/Asuncion
+395/596   America/Coral_Harbour (link to America/Panama)
+396/596   America/Cordoba (link to America/Argentina/Cordoba)
+397/596   America/Caracas
+398/596   America/Creston (link to America/Phoenix)
+399/596   America/Cancun
+400/596   America/Curacao (link to America/Puerto_Rico)
+401/596   America/Campo_Grande
+402/596   America/Cayenne
+403/596   America/Chihuahua
+404/596   America/Costa_Rica
+405/596   America/Cambridge_Bay
+406/596   America/Dominica (link to America/Puerto_Rico)
+407/596   America/Boise
+408/596   America/Chicago
+409/596   America/Dawson
+410/596   America/Ensenada (link to America/Tijuana)
+411/596   America/Cuiaba
+412/596   America/Fort_Wayne (link to America/Indiana/Indianapolis)
+413/596   America/Danmarkshavn
+414/596   America/Dawson_Creek
+415/596   America/Godthab (link to America/Nuuk)
+416/596   America/Ciudad_Juarez
+417/596   America/Eirunepe
+418/596   America/Grenada (link to America/Puerto_Rico)
+419/596   America/Guadeloupe (link to America/Puerto_Rico)
+420/596   America/Fort_Nelson
+421/596   America/El_Salvador
+422/596   America/Denver
+423/596   America/Fortaleza
+424/596   America/Detroit
+425/596   America/Edmonton
+426/596   America/Indianapolis (link to America/Indiana/Indianapolis)
+427/596   America/Guatemala
+428/596   America/Guyana
+429/596   America/Guayaquil
+430/596   America/Jujuy (link to America/Argentina/Jujuy)
+431/596   America/Glace_Bay
+432/596   America/Knox_IN (link to America/Indiana/Knox)
+433/596   America/Kralendijk (link to America/Puerto_Rico)
+434/596   America/Goose_Bay
+435/596   America/Grand_Turk
+436/596   America/Hermosillo
+437/596   America/Louisville (link to America/Kentucky/Louisville)
+438/596   America/Lower_Princes (link to America/Puerto_Rico)
+439/596   America/Halifax
+440/596   America/Jamaica
+441/596   America/La_Paz
+442/596   America/Marigot (link to America/Puerto_Rico)
+443/596   America/Lima
+444/596   America/Havana
+445/596   America/Inuvik
+446/596   America/Mendoza (link to America/Argentina/Mendoza)
+447/596   America/Iqaluit
+448/596   America/Maceio
+449/596   America/Juneau
+450/596   America/Managua
+451/596   America/Manaus
+452/596   America/Martinique
+453/596   America/Los_Angeles
+454/596   America/Merida
+455/596   America/Montreal (link to America/Toronto)
+456/596   America/Montserrat (link to America/Puerto_Rico)
+457/596   America/Nassau (link to America/Toronto)
+458/596   America/Mazatlan
+459/596   America/Nipigon (link to America/Toronto)
+460/596   America/Mexico_City
+461/596   America/Matamoros
+462/596   America/Menominee
+463/596   America/Monterrey
+464/596   America/Montevideo
+465/596   America/Pangnirtung (link to America/Iqaluit)
+466/596   America/Metlakatla
+467/596   America/Moncton
+468/596   America/Miquelon
+469/596   America/Port_of_Spain (link to America/Puerto_Rico)
+470/596   America/Porto_Acre (link to America/Rio_Branco)
+471/596   America/Noronha
+472/596   America/New_York
+473/596   America/Paramaribo
+474/596   America/Rainy_River (link to America/Winnipeg)
+475/596   America/Panama
+476/596   America/Nome
+477/596   America/Phoenix
+478/596   America/Nuuk
+479/596   America/Porto_Velho
+480/596   America/Rosario (link to America/Argentina/Cordoba)
+481/596   America/Santa_Isabel (link to America/Tijuana)
+482/596   America/Ojinaga
+483/596   America/Puerto_Rico
+484/596   America/Recife
+485/596   America/Punta_Arenas
+486/596   America/Regina
+487/596   America/Shiprock (link to America/Denver)
+488/596   America/Port-au-Prince
+489/596   America/St_Barthelemy (link to America/Puerto_Rico)
+490/596   America/Rankin_Inlet
+491/596   America/St_Kitts (link to America/Puerto_Rico)
+492/596   America/St_Lucia (link to America/Puerto_Rico)
+493/596   America/St_Thomas (link to America/Puerto_Rico)
+494/596   America/St_Vincent (link to America/Puerto_Rico)
+495/596   America/Santarem
+496/596   America/Rio_Branco
+497/596   America/Santo_Domingo
+498/596   America/Thunder_Bay (link to America/Toronto)
+499/596   America/Resolute
+500/596   America/Sao_Paulo
+501/596   America/Tortola (link to America/Puerto_Rico)
+502/596   America/Tegucigalpa
+503/596   America/Virgin (link to America/Puerto_Rico)
+504/596   America/Swift_Current
+505/596   America/Santiago
+506/596   America/Scoresbysund
+507/596   America/Yellowknife (link to America/Edmonton)
+508/596   America/Sitka
+509/596   America/St_Johns
+510/596   America/Thule
+511/596   America/Whitehorse
+512/596   America/Vancouver
+513/596   America/Toronto
+514/596   America/Tijuana
+515/596   America/Winnipeg
+516/596   America/Yakutat
+517/596   America/North_Dakota/Center
+518/596   America/North_Dakota/Beulah
+519/596   America/North_Dakota/New_Salem
+520/596   America/Kentucky/Louisville
+521/596   America/Kentucky/Monticello
+522/596   America/Indiana/Knox
+523/596   America/Argentina/ComodRivadavia (link to America/Argentina/Catamarca)
+524/596   America/Indiana/Indianapolis
+525/596   America/Indiana/Marengo
+526/596   America/Indiana/Petersburg
+527/596   America/Argentina/Buenos_Aires
+528/596   America/Argentina/Catamarca
+529/596   America/Indiana/Tell_City
+530/596   America/Argentina/Cordoba
+531/596   America/Argentina/Jujuy
+532/596   America/Indiana/Vevay
+533/596   America/Indiana/Winamac
+534/596   America/Argentina/La_Rioja
+535/596   Africa/Accra (link to Africa/Abidjan)
+536/596   Africa/Addis_Ababa (link to Africa/Nairobi)
+537/596   America/Indiana/Vincennes
+538/596   Africa/Asmara (link to Africa/Nairobi)
+539/596   Africa/Asmera (link to Africa/Nairobi)
+540/596   Africa/Bamako (link to Africa/Abidjan)
+541/596   Africa/Bangui (link to Africa/Lagos)
+542/596   Africa/Banjul (link to Africa/Abidjan)
+543/596   America/Argentina/Mendoza
+544/596   Africa/Blantyre (link to Africa/Maputo)
+545/596   Africa/Brazzaville (link to Africa/Lagos)
+546/596   Africa/Bujumbura (link to Africa/Maputo)
+547/596   America/Argentina/Rio_Gallegos
+548/596   America/Argentina/Salta
+549/596   America/Argentina/San_Juan
+550/596   Africa/Conakry (link to Africa/Abidjan)
+551/596   Africa/Dakar (link to Africa/Abidjan)
+552/596   Africa/Dar_es_Salaam (link to Africa/Nairobi)
+553/596   Africa/Djibouti (link to Africa/Nairobi)
+554/596   Africa/Douala (link to Africa/Lagos)
+555/596   America/Argentina/Tucuman
+556/596   Africa/Freetown (link to Africa/Abidjan)
+557/596   Africa/Gaborone (link to Africa/Maputo)
+558/596   Africa/Harare (link to Africa/Maputo)
+559/596   America/Argentina/San_Luis
+560/596   America/Argentina/Ushuaia
+561/596   Africa/Kampala (link to Africa/Nairobi)
+562/596   Africa/Bissau
+563/596   Africa/Kigali (link to Africa/Maputo)
+564/596   Africa/Kinshasa (link to Africa/Lagos)
+565/596   Africa/Algiers
+566/596   Africa/Libreville (link to Africa/Lagos)
+567/596   Africa/Lome (link to Africa/Abidjan)
+568/596   Africa/Luanda (link to Africa/Lagos)
+569/596   Africa/Lubumbashi (link to Africa/Maputo)
+570/596   Africa/Lusaka (link to Africa/Maputo)
+571/596   Africa/Malabo (link to Africa/Lagos)
+572/596   Africa/Abidjan
+573/596   Africa/Maseru (link to Africa/Johannesburg)
+574/596   Africa/Mbabane (link to Africa/Johannesburg)
+575/596   Africa/Mogadishu (link to Africa/Nairobi)
+576/596   Africa/Casablanca
+577/596   Africa/El_Aaiun
+578/596   Africa/Juba
+579/596   Africa/Niamey (link to Africa/Lagos)
+580/596   Africa/Nouakchott (link to Africa/Abidjan)
+581/596   Africa/Ouagadougou (link to Africa/Abidjan)
+582/596   Africa/Porto-Novo (link to Africa/Lagos)
+583/596   Africa/Johannesburg
+584/596   Africa/Timbuktu (link to Africa/Abidjan)
+585/596   Africa/Monrovia
+586/596   Africa/Maputo
+587/596   Africa/Lagos
+588/596   Africa/Khartoum
+589/596   Africa/Ceuta
+590/596   Africa/Nairobi
+591/596   Africa/Cairo
+592/596   Africa/Ndjamena
+593/596   Africa/Sao_Tome
+594/596   Africa/Tripoli
+595/596   Africa/Tunis
+596/596   Africa/Windhoek
+Finished
+IANA 2023d is ready
+Checking for GTZ updates...
+Current GTZ version is up to date: 2023dgtz
+Done
