@@ -25,9 +25,9 @@ jobs:
         run: sudo apt install -y lzip
 
       - id: check
-        name: Check for updates
-        run: node build.js | tee out.txt; echo "RESULT=$(tail out.txt -n 1)" >> $GITHUB_OUTPUT
+        name: check
+        run: node build.js | tee out.txt; echo "RESULT=$(tail out.txt -n 1)" >> $GITHUB_OUTPUT; rm out.txt
 
-      - name: Commit changes
+      - name: commit
         if: steps.check.outputs.RESULT == 'Done'
         uses: stefanzweifel/git-auto-commit-action@v5
