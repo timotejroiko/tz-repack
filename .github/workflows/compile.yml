@@ -33,5 +33,10 @@ jobs:
         if: steps.check.outputs.RESULT == 'Done'
         uses: stefanzweifel/git-auto-commit-action@v5
 
-      - name: keepalive
-        uses: gautamkrishnar/keepalive-workflow@v2
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
