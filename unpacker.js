@@ -145,7 +145,7 @@ class TimezoneUnpacker {
             if(zone.link) {
                 const obj = {
                     name: zone.name,
-                    data: unpacked.index[zone.link]
+                    data: unpacked.index[zone.link.toLowerCase()].data
                 };
                 unpacked.zones.push(obj);
                 unpacked.index[obj.name.toLowerCase()] = obj;
