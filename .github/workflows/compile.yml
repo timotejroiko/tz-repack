@@ -5,33 +5,41 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
 
   update:
     name: Update
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
-      actions: write
 
     steps:
-      - name: node
-        uses: actions/setup-node@v7
-        with:
-          node-version: lts/*
-
       - uses: actions/checkout@v7
 
-      - name: lzip
-        run: sudo apt install -y lzip
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
 
-      - id: check
-        name: check
-        run: node build.js | tee out.txt; echo "RESULT=$(tail out.txt -n 1)" >> $GITHUB_OUTPUT; rm out.txt
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
 
-      - name: commit
-        if: steps.check.outputs.RESULT == 'Done'
+      - name: Build latest timezone data
+        run: node build.js
+
+      - name: Validate published timezone data
+        run: npm test
+
+      - name: Commit validated timezone data
         uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          file_pattern: build/IANA/*.json build/GTZ/*.json
+          commit_message: Rebuild validated timezone data
 
   workflow-keepalive:
     if: github.event_name == 'schedule'

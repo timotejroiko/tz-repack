@@ -1,0 +1,36 @@
+name: Regenerate timezone data (2022+)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Regenerate upstream releases from 2022 onward
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node regenerate.js
+
+      - name: Validate published timezone data
+        run: npm test
+
+      - name: Commit validated timezone data
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          file_pattern: build/IANA/*.json build/GTZ/*.json
+          commit_message: Regenerate upstream timezone releases from 2022 onward

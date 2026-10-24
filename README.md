@@ -17,7 +17,7 @@ The `build.js` file contains the entire build process used to create the repacke
 
 This file is automatically executed once per day via Github Actions in order to check for updates.
 
-The build file is designed for linux only and requires `nodejs`, `gcc`, `make` and `lzip` to be installed in the system.
+The build file is designed for Linux only and requires `nodejs` (20.12+), `gcc`, `make`, `tar` and `gzip` to be installed in the system.
 
 Windows is not supported.
 

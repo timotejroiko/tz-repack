@@ -2,49 +2,39 @@ const fs = require("node:fs/promises");
 const cp = require("node:child_process");
 const stream = require("node:stream");
 const path = require("node:path");
+const { promisify } = require("node:util");
 
+const execFile = promisify(cp.execFile);
 const workdir = "./temp";
 const builddir = "./build";
 const sources = ["IANA", "GTZ"];
+const toolOptions = { maxBuffer: 20 * 1024 * 1024, env: { ...process.env, LC_ALL: "C" } };
 
-(async () => {
+async function main() {
     try {
         await mkdir(sources);
-        if(process.argv[2]) {
-            for(const type of sources) {
-                const target = getTarget(process.argv[2], type);
-                console.log(`Building ${type} ${target}`);
-                await download(target, type);
-                await compile(target, type);
+        const target = process.argv[2];
+        let tools;
+        for(const type of sources) {
+            const current = target ? null : await getLocal(type);
+            const version = target ? getTarget(target, type) : await getRemote(type);
+            validateVersion(version, type);
+            if(version === current) {
+                console.log(`Current ${type} version is up to date: ${current}`);
+                continue;
             }
-            console.log(("Done"));
-        } else {
-            let done = false;
-            for(const type of sources) {
-                console.log(`Checking for ${type} updates...`);
-                const current = await getLocal(type);
-                const latest = await getRemote(type);
-                if(latest !== current) {
-                    console.log(`Update found: ${type} ${current} -> ${type} ${latest}`);
-                    console.log(("Begin download"));
-                    await download(latest, type);
-                    console.log(("Begin compilation"));
-                    await compile(latest, type);
-                    await fs.copyFile(`${builddir}/${type}/${latest}.json`, `${builddir}/${type}/latest.json`);
-                    console.log((`${type} ${current} is ready`));
-                    done = true;
-                } else {
-                    console.log(`Current ${type} version is up to date: ${current}`);
-                }
-            }
-            if(done) {
-                console.log(("Done"));
+            tools ||= await prepareTools();
+            console.log(`Building ${type} ${version}`);
+            await download(version, type);
+            await compile(version, type, tools);
+            if(!target) {
+                await fs.copyFile(`${builddir}/${type}/${version}.json`, `${builddir}/${type}/latest.json`);
             }
         }
     } finally {
-        await fs.rm(workdir, { recursive: true });
+        await fs.rm(workdir, { recursive: true, force: true });
     }
-})();
+}
 
 async function getLocal(type) {
     const latest = await fs.readFile(`${builddir}/${type}/latest.json`, { encoding: "utf8" }).catch(() => null);
@@ -52,175 +42,242 @@ async function getLocal(type) {
 }
 
 async function getRemote(type) {
-    switch(type) {
-        case "IANA": {
-            return await fetch("https://data.iana.org/time-zones/tzdb/version").then(x => x.text()).then(x => x.trim());
-        }
-        case "GTZ": {
-            return await fetch("https://api.github.com/repos/JodaOrg/global-tz/releases/latest").then(x => x.json()).then(x => x.tag_name);
-        }
-        default: throw new Error("invalid type");
+    const url = type === "IANA" ? "https://data.iana.org/time-zones/tzdb/version" :
+        "https://api.github.com/repos/JodaOrg/global-tz/releases/latest";
+    const response = await request(url);
+    return type === "IANA" ? (await response.text()).trim() : (await response.json()).tag_name;
+}
+
+function validateVersion(version, type) {
+    if(!sources.includes(type) || typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(version)) {
+        throw new Error(`Invalid ${type} version: ${version}`);
     }
 }
 
 function getUrl(version, type) {
-    switch(type) {
-        case "IANA": return `https://data.iana.org/time-zones/releases/tzdb-${version}.tar.lz`;
-        case "GTZ": return `https://github.com/JodaOrg/global-tz/releases/download/${version}/tzdb-${version}.tar.lz`;
-        default: throw new Error("invalid type");
-    }
+    validateVersion(version, type);
+    return type === "IANA" ?
+        `https://data.iana.org/time-zones/releases/tzdata${version}.tar.gz` :
+        `https://github.com/JodaOrg/global-tz/releases/download/${version}/tzdata${version}.tar.gz`;
 }
 
 function getTarget(target, type) {
-    switch(type) {
-        case "IANA": return target.slice(0, 5);
-        case "GTZ": return target.slice(0, 5) + "gtz";
-    }
+    if(!/^\d{4}[a-z](?:gtz)?$/.test(target)) { throw new Error(`Invalid release: ${target}`); }
+    return target.slice(0, 5) + (type === "GTZ" ? "gtz" : "");
 }
 
 async function mkdir(types) {
-    await fs.mkdir(builddir, { recursive: true }).catch(() => {});
-    await fs.mkdir(workdir, { recursive: true }).catch(() => {});
-    await Promise.all([
-        ...types.map(x => fs.mkdir(`${builddir}/${x}`, { recursive: true }).catch(() => {})),
-        ...types.map(x => fs.mkdir(`${workdir}/${x}`, { recursive: true }).catch(() => {}))
-    ]);
+    await fs.mkdir(workdir, { recursive: true });
+    await Promise.all(types.map(type => fs.mkdir(`${builddir}/${type}`, { recursive: true })));
 }
 
-/**
- * @param {string} version 
- */
-async function download(version, type = "IANA") {
-    const p = path.resolve(workdir, type);
-    const url = getUrl(version, type);
+async function request(url) {
+    const headers = url.startsWith("https://api.github.com/") && process.env.GH_TOKEN ?
+        { Authorization: `Bearer ${process.env.GH_TOKEN}` } : {};
+    const response = await fetch(url, { headers });
+    if(!response.ok) { throw new Error(`Fetching ${url}: ${response.status} ${response.statusText}`); }
+    return response;
+}
+
+async function extract(url, directory) {
+    const archive = path.join(directory, path.basename(new URL(url).pathname));
     console.log(`Fetching ${url}`);
-    const response = await fetch(url);
-    if(response.status !== 200 || !response.body) {
-        throw new Error(response.statusText);
-    }
+    const response = await request(url);
+    if(!response.body) { throw new Error(`Empty archive response: ${url}`); }
     const body = /** @type {import("stream/web").ReadableStream} */ (response.body);
-    const readable = stream.Readable.fromWeb(body);
-    console.log("Downloading file");
-    await fs.writeFile(`${p}/tzdb-${version}.tar.lz`, readable);
-    console.log("Extracting data");
-    await new Promise((resolve, reject) => {
-        cp.exec(`lzip -dc ${p}/tzdb-${version}.tar.lz | tar -xf - -C ${p} --strip-components=1`, err => err ? reject(err) : resolve(undefined));
-    });
-    console.log("Finished");
+    await fs.writeFile(archive, stream.Readable.fromWeb(body));
+    await execFile("tar", ["-xzf", archive, "-C", directory], toolOptions);
 }
 
-/**
- * @param {string} version 
- */
-async function compile(version, type) {
-    console.log("Compiling binaries");
-    const p = path.resolve(workdir, type);
-    await new Promise((resolve, reject) => {
-        cp.exec("make", { cwd: p }, err => err ? reject(err) : resolve(undefined));
-    });
-    console.log("Compiling timezone files");
-    const files = ["africa", "antarctica", "asia", "australasia", "europe", "northamerica", "southamerica", "etcetera", "backward"];
-    await fs.mkdir(`${p}/compiled`).catch(() => {});
-    for(const file of files) {
-        // cannot be concurrent, race condition when generating files
-        await new Promise((resolve, reject) => cp.exec(`zic -d ./compiled ./${file}`, { cwd: p }, err => err ? reject(err) : resolve(undefined)));
-    }
-    console.log("Collecting data...");
-    const paths = await fs.readdir(`${p}/compiled`, { recursive: true, withFileTypes: true }).then(x => x.filter(x => x.isFile()).map(x => path.resolve(`${x.path}/${x.name}`)));
-    const links = await Promise.all(files.map(
-        file => fs.readFile(`${p}/${file}`, { encoding: "utf8" }).then(
-            data => data.split("\n").filter(x => x.startsWith("Link\t")).map(x => x.split(/\s+/).slice(1, 3))
-        )
-    )).then(data => data.flat().reduce((a, t) => (a[t[1]] = t[0]) && a, {}));
-    const concurrency = [];
-    const final = [];
-    let n = 1;
-    for(const file of paths) {
-        const name = file.slice(file.indexOf("compiled/") + 9);
-        const link = links[name];
-        if(link) {
-            console.log(`${`${n++}/${paths.length}`.padEnd(10, " ")}${name} (link to ${link})`);
-            final.push({ name, link });
-            continue;
-        }
-        const promise = new Promise((resolve, reject) => {
-            cp.exec(`zdump -V ${file}`, { cwd: p, maxBuffer: 20*1024*1024 }, (err, out) => {
-                if(err) {
-                    reject(err);
-                } else if(!out.length) {
-                    cp.exec(`zdump UTC ${file}`, { cwd: p }, (err, out2) => err ? reject(err) : resolve(out2));
-                } else {
-                    resolve(out);
-                }
-            });
-        }).then(data => {
-            console.log(`${`${n++}/${paths.length}`.padEnd(10, " ")}${name}`);
-            const lines = data.split("\n").map(x => x.slice(x.indexOf("  ") + 2));
-            const offsets = [];
-            const untils = [];
-            const abbrs = [];
-            const isdst = [];
-            for(const line of lines) {
-                const parts = line.split(/\s+/);
-                if(/failed|-2147481748|2147485547/.test(line) || parts.length < 12) {
-                    break;
-                }
-                const utc = new Date(parts.slice(1, 5).join(" "));
-                const local = new Date(parts.slice(8, 12).join(" "));
-                offsets.push((utc.getTime() - local.getTime()) / 60000);
-                untils.push(utc.getTime());
-                abbrs.push(parts[12]);
-                isdst.push(Number(parts[13].slice(6)));
+async function prepareTools(version) {
+    version ||= await getRemote("IANA");
+    validateVersion(version, "IANA");
+    const directory = path.resolve(workdir, "tools");
+    await fs.rm(directory, { recursive: true, force: true });
+    await fs.mkdir(directory, { recursive: true });
+    await extract(`https://data.iana.org/time-zones/releases/tzcode${version}.tar.gz`, directory);
+    // The Makefile's version target also depends on timezone data files.
+    await extract(`https://data.iana.org/time-zones/releases/tzdata${version}.tar.gz`, directory);
+    // Build the extraction tools once per run.
+    await execFile("make", ["zic", "zdump"], { ...toolOptions, cwd: directory });
+    return { zic: path.join(directory, "zic"), zdump: path.join(directory, "zdump") };
+}
 
-            }
-            if(offsets.length === 0 && lines.length === 3 && lines[2].length === 0) {
-                const utcParts = lines[0].split(/\s+/);
-                const localParts = lines[1].split(/\s+/);
-                const utc = new Date(utcParts.slice(1, 5).join(" "));
-                const local = new Date(localParts.slice(1, 5).join(" "));
-                offsets.push((utc.getTime() - local.getTime()) / 60000);
-                untils.push(Infinity);
-                abbrs.push(localParts[5]);
-                isdst.push(0);
-            }
-            const abbrs2   = [];
-            const untils2  = [];
-            const offsets2 = [];
-            const isdst2 = [];
-            for(let i = abbrs.length - 1; i >= 0; i--) {
-                if (abbrs2[0] === abbrs[i] && offsets2[0] === offsets[i]) { continue; }
-                untils2.unshift(i === abbrs.length - 1 ? Infinity : untils[i + 1]);
-                abbrs2.unshift(abbrs[i]);
-                offsets2.unshift(offsets[i]);
-                isdst2.unshift(isdst[i]);
-            }
-            const abbrlist = [...new Set(abbrs2)];
-            const offsetlist = [...new Set(offsets2)];
-            const untillist = [...new Set(untils2.map((x, i) => (i > 0 ? Math.abs(x - untils2[i-1]) : x) / 3600000))];
-            final.push({
-                name,
-                abbrs: abbrlist,
-                offsets: offsetlist,
-                untils: untillist,
-                data: untils2.map((x, i) => String.fromCodePoint(
-                    (abbrlist.indexOf(abbrs2[i]) << 15) +
-                    (offsetlist.indexOf(offsets2[i]) << 10) +
-                    (isdst2[i] << 9) +
-                    untillist.indexOf((i > 0 ? Math.abs(x - untils2[i-1]) : x) / 3600000)
-                )).join("")
-            });
-            concurrency.splice(concurrency.indexOf(promise), 1);
-        });
-        concurrency.push(promise);
-        if(concurrency.length >= 10) {
-            await Promise.race(concurrency);
+async function download(version, type, url = getUrl(version, type)) {
+    validateVersion(version, type);
+    const directory = path.resolve(workdir, type);
+    await fs.rm(directory, { recursive: true, force: true });
+    await fs.mkdir(directory, { recursive: true });
+    await extract(url, directory);
+}
+
+async function compile(version, type, tools) {
+    validateVersion(version, type);
+    const p = path.resolve(workdir, type);
+    const options = { ...toolOptions, cwd: p };
+    const files = ["africa", "antarctica", "asia", "australasia", "europe", "northamerica", "southamerica", "etcetera", "backward"];
+    const texts = await Promise.all(files.map(file => fs.readFile(path.join(p, file), "utf8")));
+    const text = texts.join("\n");
+    await fs.writeFile(path.join(p, "selected.zi"), text);
+    const compiled = path.join(p, "compiled");
+    await fs.mkdir(compiled);
+    await execFile(tools.zic, ["-d", compiled, "selected.zi"], options);
+    const zones = new Set();
+    const links = new Map();
+    for(const line of text.split(/\r?\n/)) {
+        const fields = line.split("#", 1)[0].trim().split(/\s+/);
+        if(fields[0] === "Zone") {
+            validateName(fields[1]);
+            zones.add(fields[1]);
+        } else if(fields[0] === "Link") {
+            validateName(fields[1]);
+            validateName(fields[2]);
+            links.set(fields[2], fields[1]);
         }
     }
-    await Promise.all(concurrency);
+    if(!zones.size) { throw new Error("No source zones found"); }
+    const final = [];
+    for(const [name, target] of links) {
+        let resolved = target;
+        const visited = new Set([name]);
+        while(links.has(resolved)) {
+            if(visited.has(resolved)) { throw new Error(`Cyclic link: ${name}`); }
+            visited.add(resolved);
+            resolved = links.get(resolved);
+        }
+        if(!zones.has(resolved)) { throw new Error(`Missing link target: ${name} -> ${resolved}`); }
+        final.push({ name, link: resolved });
+    }
+    const zoneNames = [...zones];
+    for(let i = 0; i < zoneNames.length; i += 10) {
+        const batch = await Promise.all(zoneNames.slice(i, i + 10).map(async name => {
+            const file = path.join(compiled, ...name.split("/"));
+            const { stdout } = await execFile(tools.zdump, ["-V", "-c", "-500,2500", file], options);
+            let timeline;
+            if(stdout.trim()) {
+                timeline = parseTransitions(stdout, file);
+            } else {
+                const initial = await execFile(tools.zdump, ["-i", "-c", "-500,2500", file], options);
+                timeline = parseFixed(initial.stdout);
+            }
+            return packZone(name, timeline);
+        }));
+        final.push(...batch);
+        console.log(`${Math.min(i + 10, zoneNames.length)}/${zoneNames.length} zones collected`);
+    }
     final.sort((a, b) => a.name.localeCompare(b.name));
-    await fs.writeFile(`${builddir}/${type}/${version}.json`, JSON.stringify({
-        version,
-        zones: final
-    }));
-    console.log("Finished");
+    await fs.writeFile(`${builddir}/${type}/${version}.json`, JSON.stringify({ version, zones: final }));
+    console.log(`Finished ${type} ${version}`);
+}
+
+function validateName(name) {
+    if(typeof name !== "string" || !/^[A-Za-z0-9_+.-]+(?:\/[A-Za-z0-9_+.-]+)*$/.test(name) ||
+        name.split("/").some(part => part === "." || part === "..")) {
+        throw new Error(`Invalid zone name: ${name}`);
+    }
+}
+
+function validateState(state) {
+    if(!Number.isFinite(state.offset) || Math.abs(state.offset) > 1440 ||
+        typeof state.abbr !== "string" || !state.abbr.length || /[\x00-\x20\x7f]/.test(state.abbr) ||
+        (state.dst !== 0 && state.dst !== 1)) {
+        throw new Error(`Invalid zone state: ${JSON.stringify(state)}`);
+    }
+    return state;
+}
+
+function parseTransitions(output, file) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const records = output.trimEnd().split(/\r?\n/).map(line => {
+        if(!line.startsWith(file + "  ")) { throw new Error(`Malformed zdump record: ${line}`); }
+        const match = /^\s*(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat) (\w{3})\s+(\d{1,2}) (\d{2}):(\d{2}):(\d{2}) (-?\d+) UT = .+? (\S+) isdst=(-?\d+) gmtoff=(-?\d+)$/.exec(line.slice(file.length));
+        if(!match) { throw new Error(`Malformed zdump record: ${line}`); }
+        const [, month, day, hour, minute, second, year, abbr, dst, gmtoff] = match;
+        const date = new Date(0);
+        date.setUTCFullYear(Number(year), months.indexOf(month), Number(day));
+        date.setUTCHours(Number(hour), Number(minute), Number(second), 0);
+        if(months.indexOf(month) < 0 || !Number.isFinite(date.getTime())) {
+            throw new Error(`Invalid UTC timestamp: ${line}`);
+        }
+        return { at: date.getTime(), ...validateState({ abbr, dst: Number(dst), offset: -Number(gmtoff) / 60 }) };
+    });
+    if(!records.length || records.length % 2) { throw new Error(`Incomplete transitions: ${file}`); }
+    const timeline = [];
+    let current = records[0];
+    for(let i = 0; i < records.length; i += 2) {
+        const before = records[i];
+        const after = records[i + 1];
+        if(after.at !== before.at + 1000 || (i && before.at <= records[i - 1].at) ||
+            !sameState(before, current)) { throw new Error(`Inconsistent transitions: ${file}`); }
+        if(!sameState(before, after)) {
+            timeline.push({ ...current, until: after.at });
+            current = after;
+        }
+    }
+    timeline.push({ ...current, until: Infinity });
+    return timeline;
+}
+
+function sameState(a, b) {
+    return a.abbr === b.abbr && a.offset === b.offset && a.dst === b.dst;
+}
+
+function parseFixed(output) {
+    const lines = output.trim().split(/\r?\n/);
+    if(lines.length !== 2 || !/^TZ=".*"$/.test(lines[0])) { throw new Error(`Malformed fixed-zone dump: ${output}`); }
+    const fields = lines[1].split("\t");
+    const match = /^([+-])(\d{2})(?:(\d{2})(\d{2})?)?$/.exec(fields[2]);
+    if(fields[0] !== "-" || fields[1] !== "-" || !match || fields.length > 5 ||
+        (fields[4] !== undefined && !/^[01]$/.test(fields[4])) ||
+        Number(match[3] || 0) > 59 || Number(match[4] || 0) > 59) {
+        throw new Error(`Malformed fixed-zone interval: ${lines[1]}`);
+    }
+    const [, sign, hours, minutes = "0", seconds = "0"] = match;
+    let abbr = fields[3] || fields[2];
+    if(abbr.startsWith('"')) {
+        if(!/^"(?:[^"\\]|\\[s"\\fnrtv])*"$/.test(abbr)) { throw new Error(`Invalid abbreviation: ${abbr}`); }
+        const escapes = { s: " ", '"': '"', "\\": "\\", f: "\f", n: "\n", r: "\r", t: "\t", v: "\v" };
+        abbr = abbr.slice(1, -1).replace(/\\([s"\\fnrtv])/g, (_, char) => escapes[char]);
+    } else if(fields[3] && !/^[A-Za-z]+$/.test(abbr)) {
+        throw new Error(`Invalid abbreviation: ${abbr}`);
+    }
+    const offset = (Number(hours) * 60 + Number(minutes) + Number(seconds) / 60) * (sign === "+" ? -1 : 1);
+    const dst = fields[4] === undefined ? 0 : Number(fields[4]);
+    return [{ ...validateState({ abbr, offset, dst }), until: Infinity }];
+}
+
+function packZone(name, timeline) {
+    if(!timeline.length || timeline[timeline.length - 1].until !== Infinity) { throw new Error(`Empty or unterminated timeline: ${name}`); }
+    const abbrs = [];
+    const offsets = [];
+    const untils = [];
+    const chars = [];
+    let previous = -Infinity;
+    for(let i = 0; i < timeline.length; i++) {
+        const state = validateState(timeline[i]);
+        if(!(state.until > previous) || (state.until !== Infinity && !Number.isSafeInteger(state.until))) {
+            throw new Error(`Invalid transition boundary: ${name}`);
+        }
+        const until = (i ? state.until - previous : state.until) / 3600000;
+        if(!abbrs.includes(state.abbr)) { abbrs.push(state.abbr); }
+        if(!offsets.includes(state.offset)) { offsets.push(state.offset); }
+        if(!untils.includes(until)) { untils.push(until); }
+        const code = abbrs.indexOf(state.abbr) * 32768 + offsets.indexOf(state.offset) * 1024 +
+            state.dst * 512 + untils.indexOf(until);
+        if(offsets.length > 32 || untils.length > 512 || code > 0x10ffff) {
+            throw new Error(`Packed dictionary overflow: ${name}`);
+        }
+        chars.push(String.fromCodePoint(code));
+        previous = state.until;
+    }
+    return { name, abbrs, offsets, untils, data: chars.join("") };
+}
+
+module.exports = {
+    mkdir, getRemote, getUrl, getTarget, validateVersion, request, prepareTools, download, compile,
+    parseTransitions, parseFixed, packZone, sameState
+};
+
+if(require.main === module) {
+    main().catch(error => { console.error(error); process.exitCode = 1; });
 }
