@@ -35,11 +35,18 @@ jobs:
       - name: Validate published timezone data
         run: npm test
 
+      - name: Prepare commit message
+        id: commit
+        run: |
+          iana=$(node -p "require('./build/IANA/latest.json').version")
+          gtz=$(node -p "require('./build/GTZ/latest.json').version")
+          echo "message=Update timezone data: IANA $iana, GTZ $gtz" >> "$GITHUB_OUTPUT"
+
       - name: Commit validated timezone data
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           file_pattern: build/IANA/*.json build/GTZ/*.json
-          commit_message: Rebuild validated timezone data
+          commit_message: ${{ steps.commit.outputs.message }}
 
   workflow-keepalive:
     if: github.event_name == 'schedule'
