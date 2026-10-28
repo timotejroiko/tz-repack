@@ -11,6 +11,16 @@ This repack includes everything from the original source files, nothing was remo
 
 Additionally, a daily Github Actions workflow is active in this repo and will automatically repack the next tzdata versions whenever they become available.
 
+## Versioning
+
+When either source releases a new version, this repository's `package.json` is updated and a Github release is published.
+
+The versioning scheme losely follows IANA's versioning, with the year as the major version and the letter as a numeric minor version. The patch version denotes alternate source releases or lesser updates, followed by additional build metadata. For example:
+
+`IANA 2027a` -> `2027.1.0+2027a-iana`
+`GTZ 2027a` -> `2027.1.1+2027a-gtz`
+
+
 ## Build file
 
 The `build.js` file contains the entire build process used to create the repacked timezone database files, including downloading, compiling and extracting the timezone data from the raw files.

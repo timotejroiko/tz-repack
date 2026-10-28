@@ -15,9 +15,12 @@ async function main() {
         await mkdir(sources);
         const target = process.argv[2];
         let tools;
+        const latest = {};
+        const changed = [];
         for(const type of sources) {
             const current = target ? null : await getLocal(type);
             const version = target ? getTarget(target, type) : await getRemote(type);
+            latest[type] = version;
             validateVersion(version, type);
             if(version === current) {
                 console.log(`Current ${type} version is up to date: ${current}`);
@@ -29,8 +32,10 @@ async function main() {
             await compile(version, type, tools);
             if(!target) {
                 await fs.copyFile(`${builddir}/${type}/${version}.json`, `${builddir}/${type}/latest.json`);
+                changed.push(type);
             }
         }
+        if(!target) { await updatePackageVersion(latest, changed); }
     } finally {
         await fs.rm(workdir, { recursive: true, force: true });
     }
@@ -39,6 +44,29 @@ async function main() {
 async function getLocal(type) {
     const latest = await fs.readFile(`${builddir}/${type}/latest.json`, { encoding: "utf8" }).catch(() => null);
     return JSON.parse(latest)?.version || "none";
+}
+
+function nextVersion(current, iana, gtz, sources) {
+    if(!sources.length) { return current; }
+    const releases = [iana, gtz].map(version => {
+        const match = /^(\d{4})([a-z])(?:gtz)?$/.exec(version);
+        if(!match) { throw new Error(`Unsupported timezone release: ${version}`); }
+        return [Number(match[1]), match[2].charCodeAt(0) - 96];
+    });
+    const [year, minor] = releases.sort((a, b) => b[0] - a[0] || b[1] - a[1])[0];
+    const previous = /^(\d+)\.(\d+)\.(\d+)(?:\+[A-Za-z0-9.-]+)?$/.exec(current);
+    if(!previous) { throw new Error(`Unsupported package version: ${current}`); }
+    const [, previousYear, previousMinor, previousPatch] = previous.map(Number);
+    const patch = year === previousYear && minor === previousMinor ? previousPatch + 1 : 0;
+    return `${year}.${minor}.${patch}+${year}${String.fromCharCode(96 + minor)}-${sources.join(".").toLowerCase()}`;
+}
+
+async function updatePackageVersion(latest, changed) {
+    if(!changed.length) { return; }
+    const packageJson = await fs.readFile("package.json", "utf8");
+    const version = nextVersion(JSON.parse(packageJson).version, latest.IANA, latest.GTZ, changed);
+    await fs.writeFile("package.json", packageJson.replace(/("version"\s*:\s*")[^"]+("\s*[,}])/, `$1${version}$2`));
+    console.log(`Prepared ${version}: IANA ${latest.IANA}, GTZ ${latest.GTZ}`);
 }
 
 async function getRemote(type) {
@@ -166,8 +194,15 @@ async function compile(version, type, tools) {
         console.log(`${Math.min(i + 10, zoneNames.length)}/${zoneNames.length} zones collected`);
     }
     final.sort((a, b) => a.name.localeCompare(b.name));
-    await fs.writeFile(`${builddir}/${type}/${version}.json`, JSON.stringify({ version, zones: final }));
+    const file = `${builddir}/${type}/${version}.json`;
+    const json = JSON.stringify({ version, zones: final });
+    const previous = await fs.readFile(file, "utf8").catch(error => {
+        if(error.code !== "ENOENT") { throw error; }
+        return null;
+    });
+    await fs.writeFile(file, json);
     console.log(`Finished ${type} ${version}`);
+    return json !== previous;
 }
 
 function validateName(name) {
@@ -275,7 +310,7 @@ function packZone(name, timeline) {
 
 module.exports = {
     mkdir, getRemote, getUrl, getTarget, validateVersion, request, prepareTools, download, compile,
-    parseTransitions, parseFixed, packZone, sameState
+    parseTransitions, parseFixed, packZone, sameState, nextVersion, updatePackageVersion
 };
 
 if(require.main === module) {

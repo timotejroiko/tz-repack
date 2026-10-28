@@ -1,6 +1,6 @@
 const fs = require("node:fs/promises");
 const {
-    mkdir, getRemote, validateVersion, request, prepareTools, download, compile
+    mkdir, getRemote, validateVersion, request, prepareTools, download, compile, updatePackageVersion
 } = require("./build.js");
 
 async function discoverIana() {
@@ -52,15 +52,23 @@ async function main() {
         }
         await mkdir(types);
         const tools = await prepareTools(latest.IANA);
+        const changed = [];
         for(const type of types) {
+            const file = `./build/${type}/latest.json`;
+            const previous = await fs.readFile(file).catch(error => {
+                if(error.code !== "ENOENT") { throw error; }
+            });
+            let updated = false;
             for(const [index, release] of discovered[type].entries()) {
                 console.log(`${type} ${index + 1}/${discovered[type].length}: ${release.version}`);
                 await download(release.version, type, release.url);
-                await compile(release.version, type, tools);
+                if(await compile(release.version, type, tools)) { updated = true; }
             }
             // "beta" sorts after numbered releases; latest must come from upstream metadata.
-            await fs.copyFile(`./build/${type}/${latest[type]}.json`, `./build/${type}/latest.json`);
+            await fs.copyFile(`./build/${type}/${latest[type]}.json`, file);
+            if(updated || !previous?.equals(await fs.readFile(file))) { changed.push(type); }
         }
+        await updatePackageVersion(latest, changed);
     } finally {
         await fs.rm("./temp", { recursive: true, force: true });
     }

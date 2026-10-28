@@ -35,18 +35,37 @@ jobs:
       - name: Validate published timezone data
         run: npm test
 
-      - name: Prepare commit message
-        id: commit
+      - name: Prepare release metadata
+        id: prepare
         run: |
+          version=$(node -p "require('./package.json').version")
           iana=$(node -p "require('./build/IANA/latest.json').version")
           gtz=$(node -p "require('./build/GTZ/latest.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "iana=$iana" >> "$GITHUB_OUTPUT"
+          echo "gtz=$gtz" >> "$GITHUB_OUTPUT"
           echo "message=Update timezone data: IANA $iana, GTZ $gtz" >> "$GITHUB_OUTPUT"
 
       - name: Commit validated timezone data
+        id: commit
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          file_pattern: build/IANA/*.json build/GTZ/*.json
-          commit_message: ${{ steps.commit.outputs.message }}
+          file_pattern: package.json build/IANA/*.json build/GTZ/*.json
+          commit_message: ${{ steps.prepare.outputs.message }}
+
+      - name: Publish GitHub release
+        if: steps.commit.outputs.changes_detected == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.prepare.outputs.version }}
+          IANA: ${{ steps.prepare.outputs.iana }}
+          GTZ: ${{ steps.prepare.outputs.gtz }}
+          COMMIT: ${{ steps.commit.outputs.commit_hash }}
+        run: |
+          gh release create "v$VERSION" \
+            --target "$COMMIT" \
+            --title "$VERSION — IANA $IANA / GTZ $GTZ" \
+            --generate-notes
 
   workflow-keepalive:
     if: github.event_name == 'schedule'
