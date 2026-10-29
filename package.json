@@ -1,6 +1,6 @@
 {
   "name": "tz-repack",
-  "version": "2026.5.1+2026e-gtz",
+  "version": "2026.6.0+2026f-iana.gtz",
   "description": "Complete IANA timezone database repackaged for easy offline use",
   "main": "unpacker.js",
   "scripts": {
