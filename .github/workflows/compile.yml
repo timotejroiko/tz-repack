@@ -30,6 +30,8 @@ jobs:
           sudo apt-get install -y build-essential
 
       - name: Build latest timezone data
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: node build.js
 
       - name: Validate published timezone data
