@@ -4,8 +4,7 @@ class TimezoneUnpacker {
      *      version: string,
      *      zones: ({
      *          name: string,
-     *          abbrs: string[],
-     *          offsets: number[],
+     *          states: [abbr: string, offset: number, dst: 0 | 1][],
      *          untils: (number | null)[],
      *          data: string
      *      } | {
@@ -90,8 +89,7 @@ class TimezoneUnpacker {
     /**
      * @param {{
      *      name: string,
-     *      abbrs: string[],
-     *      offsets: number[],
+     *      states: [abbr: string, offset: number, dst: 0 | 1][],
      *      untils: (number | null)[],
      *      data: string
      *  }} zone the packed zone data object
@@ -100,15 +98,15 @@ class TimezoneUnpacker {
     static unpackZone(zone) {
         const unpacked = [];
         for(const char of zone.data) {
-            const code = char.codePointAt();
+            let code = char.codePointAt(0);
+            // Reverse the code point mapping in build.js.
+            if(code >= 0xe000) { code -= 0x800; }
+            if(code > 0x5c) { code--; }
+            if(code > 0x22) { code--; }
+            code -= 0x20;
             const prev = unpacked[unpacked.length - 1];
-            const abbr_index = code >> 15;
-            const offset_index = (code >> 10) & 31;
-            const isdst = (code >> 9) & 1;
-            const until_index = code & 511;
-            const abbr = zone.abbrs[abbr_index];
-            const offset = zone.offsets[offset_index];
-            const until = zone.untils[until_index];
+            const [abbr, offset, isdst] = zone.states[code >>> 9];
+            const until = zone.untils[code & 511];
             const realuntil = until === null ? Infinity : until * 3600000;
             unpacked.push({
                 abbr,

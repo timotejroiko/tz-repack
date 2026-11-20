@@ -43,7 +43,7 @@ async function main() {
 
 async function getLocal(type) {
     const latest = await fs.readFile(`${builddir}/${type}/latest.json`, { encoding: "utf8" }).catch(() => null);
-    return JSON.parse(latest)?.version || "none";
+    return JSON.parse(latest)?.version ?? "none";
 }
 
 function nextVersion(current, iana, gtz, sources) {
@@ -283,29 +283,53 @@ function parseFixed(output) {
 
 function packZone(name, timeline) {
     if(!timeline.length || timeline[timeline.length - 1].until !== Infinity) { throw new Error(`Empty or unterminated timeline: ${name}`); }
-    const abbrs = [];
-    const offsets = [];
-    const untils = [];
-    const chars = [];
+    const stateCounts = new Map();
+    const untilCounts = new Map();
+    const entries = new Array(timeline.length * 2);
     let previous = -Infinity;
     for(let i = 0; i < timeline.length; i++) {
-        const state = validateState(timeline[i]);
-        if(!(state.until > previous) || (state.until !== Infinity && !Number.isSafeInteger(state.until))) {
+        const { abbr, offset, dst, until } = validateState(timeline[i]);
+        if(!(until > previous) || (until !== Infinity && !Number.isSafeInteger(until))) {
             throw new Error(`Invalid transition boundary: ${name}`);
         }
-        const until = (i ? state.until - previous : state.until) / 3600000;
-        if(!abbrs.includes(state.abbr)) { abbrs.push(state.abbr); }
-        if(!offsets.includes(state.offset)) { offsets.push(state.offset); }
-        if(!untils.includes(until)) { untils.push(until); }
-        const code = abbrs.indexOf(state.abbr) * 32768 + offsets.indexOf(state.offset) * 1024 +
-            state.dst * 512 + untils.indexOf(until);
-        if(offsets.length > 32 || untils.length > 512 || code > 0x10ffff) {
-            throw new Error(`Packed dictionary overflow: ${name}`);
+        const hours = until === Infinity ? null : (i ? until - previous : until) / 3600000;
+        const key = `${abbr}\0${offset}\0${dst}`;
+        let stateEntry = stateCounts.get(key);
+        if(!stateEntry) {
+            stateEntry = { value: [abbr, offset, dst], count: 0, index: 0 };
+            stateCounts.set(key, stateEntry);
         }
-        chars.push(String.fromCodePoint(code));
-        previous = state.until;
+        let untilEntry = untilCounts.get(hours);
+        if(!untilEntry) {
+            untilEntry = { value: hours, count: 0, index: 0 };
+            untilCounts.set(hours, untilEntry);
+        }
+        stateEntry.count++;
+        untilEntry.count++;
+        entries[i * 2] = stateEntry;
+        entries[i * 2 + 1] = untilEntry;
+        previous = until;
     }
-    return { name, abbrs, offsets, untils, data: chars.join("") };
+    if(stateCounts.size > 128 || untilCounts.size > 512) { throw new Error(`Packed dictionary overflow: ${name}`); }
+    const states = [...stateCounts.values()].sort((a, b) => b.count - a.count).map((entry, index) => {
+        entry.index = index;
+        return entry.value;
+    });
+    const untils = [...untilCounts.values()].sort((a, b) => b.count - a.count).map((entry, index) => {
+        entry.index = index;
+        return entry.value;
+    });
+    const chars = new Array(timeline.length);
+    for(let i = 0; i < chars.length; i++) {
+        let code = (entries[i * 2].index << 9) | entries[i * 2 + 1].index;
+        // Skip C0 controls, JSON quote and backslash, and UTF-16 surrogates.
+        code += 0x20;
+        if(code >= 0x22) { code++; }
+        if(code >= 0x5c) { code++; }
+        if(code >= 0xd800) { code += 0x800; }
+        chars[i] = String.fromCodePoint(code);
+    }
+    return { name, states, untils, data: chars.join("") };
 }
 
 module.exports = {

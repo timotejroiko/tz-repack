@@ -2,7 +2,7 @@
 
 Complete IANA timezone database repackaged for easy offline use.
 
-The entire database is packed into a single json file totalling ~660kb raw or ~50kb gzipped.
+The entire database is packed into a single JSON file, about 280–320 KiB raw or 37–41 KiB gzipped per flavor.
 
 This repack includes everything from the original source files, nothing was removed or modified, and is currently available in two flavors, IANA and GTZ:
 
@@ -40,103 +40,59 @@ Feel free to use it directly, or as a working example for how to unpack the pack
 ```js
 // example
 const Unpacker = require("./unpacker.js");
-const data = require("./2023d.json");
+const data = require("./build/IANA/latest.json");
 
 const timezone = new Unpacker(data);
 console.log(timezone.getZone("america/new_york"));
 ```
 
-```ts
-// typings
-class TimezoneUnpacker {
-    constructor(data: packedJsonFile)
-    getZone(timezone: string): unpackedTimezoneData
-    getZoneEntry(timezone: string, timestamp: number): unpackedTimezoneEntry
-    hasZone(timezone: string): boolean
-    listZones(): string[]
-    static unpackZone(packedTimezoneData): unpackedTimezoneData
-    static unpackFile(packedJsonfile): unpackedJsonFile
-}
-
-type packedJsonFile = {
-    version: string,
-    zones: packedTimezoneData[]
-}
-
-type packedTimezoneData = {
-    name: string,
-    abbrs: string[],
-    offsets: number[],
-    untils: (number | null)[],
-    data: string
-}
-
-type unpackedJsonFile = {
-    version: string,
-    zones: unpackedTimezoneData[],
-    index: Record<string, unpackedTimezoneData>
-}
-
-type unpackedTimezoneData = {
-    name: string,
-    data: unpackedTimezoneEntry[]
-}
-
-type unpackedTimezoneEntry = {
-    abbr: string,
-    offset: number,
-    dst: boolean,
-    from: number,
-    until: number
-}
-```
-
 ## Format
 
-The packed json file has the following format:
+The packed JSON file has the following format:
 
 ```ts
 {
-    version: string,
+    version: string, // upstream tzdata release, e.g. 2026e
     zones: Array<{
-        name: string, // timezone identifier, ie: America/New_York
-        abbrs: Array<string>, // list of abbreviations, ie: EST
-        offsets: Array<number> // list of timezone offsets in minutes
-        untils: Array<number | null> // list of time markers in hours: [initial_timestamp, ...time_diffs, null]
-        data: string // binary data represented as a string of utf16 code points where each character stores 20 bits of information
+        name: string, // timezone identifier, e.g. America/New_York
+        states: Array<[abbr: string, offset: number, dst: 0 | 1]>, // offset in minutes west of UTC
+        untils: Array<number | null>, // initial timestamp or delta in hours; null means no end
+        data: string // one Unicode code point per interval
     } | {
-        name: string, // timezone identifier
-        link: string // some timezones are aliases to other timezones, here is the name of the timezone we should redirect to
+        name: string, // alias identifier
+        link: string // canonical timezone identifier
     }>
 }
 ```
 
-Unpacking the binary data requires iterating over the data characters and adding the cumulative time differences in order to obtain the actual timestamps.
+Each code point in `data` stores a 16-bit word: `[7 bits state index][9 bits until index]`. Both dictionaries are sorted by descending frequency, with ties in first-use order. The encoding skips unsafe characters by offsetting them, which decoding needs to reverse.
 
-Here's some pseudocode, you can also check `unpacker.js` for a working example.
+Unpacking the timeline means taking the first boundary as an absolute Unix timestamp and adding each later delta to the previous boundary. It's the position in `data`, not the index in `untils`, that identifies the first interval.
+
+Here's the decoding loop. See `unpacker.js` for the full implementation.
 
 ```js
-// each character in the zone.data string represents an entry for a given timezone and contains information for that timezone during a specific period of time
-// each character holds 20 bits of information as follows: [5 bits abbr_index][5 bits offset_index][1 bit dst][9 bits until_index]
+const entries = [];
+let from = -Infinity;
 
-abbr_index // first 5 bits, index to get the timezone abbreviation from the abbrs array
-offset_index // next 5 bits, index to get the timezone offset from the offsets array
-isDST // next 1 bit, whether or not daylight savings is active
-until_index // final 9 bits, index to get the timestamp data from the untils array
+for (const char of zone.data) {
+    let word = char.codePointAt(0);
+    // reverse offsets added by encoder
+    if (word >= 0xe000) word -= 0x800; // surrogates
+    if (word > 0x5c) word--; // backslash
+    if (word > 0x22) word--; // quotation
+    word -= 0x20; // control characters
 
-// the untils array holds the necessary information to reconstruct the timeline of the timezone including the timestamps of each entry
-if(untils[until_index] === null) { // if the until is null, we reached end of time
-    timestamp = Infinity // extend to infinity
-} else if(until_index === 0) { // if the entry is the first entry we use it directly
-    timestamp = untils[until_index] * 3600000 // first until is the initial timestamp in hours, convert hours to milliseconds
-} else { // all other untils represent the time offset in hours since the previous timestamp
-    timestamp = get_previous_timestamp_somehow + untils[until_index] * 3600000 // convert hours to milliseconds and add to the previous timestamp
-}
+    // get current until and state
+    const stateIndex = word >> 9;
+    const untilIndex = word & 511;
+    const [abbr, offset, dst] = zone.states[stateIndex];
+    const hours = zone.untils[untilIndex];
 
-entry = { // example of a single timeline entry for a given timezone
-    abbr: zone.abbrs[abbr_index], // current timezone abbreviation, if available
-    offset: zone.offsets[offset_index], // current timezone offset in minutes
-    isDTS: isDST, // whether or not daylight savings is currently active
-    until: timestamp // timestamp until when the current entry is valid
+    // get full until timestamp from initial value or by adding delta to the previous value
+    const until = hours === null ? Infinity : (entries.length ? from : 0) + hours * 3600000;
+
+    entries.push({ abbr, offset, dst: Boolean(dst), from, until });
+    from = until;
 }
 ```

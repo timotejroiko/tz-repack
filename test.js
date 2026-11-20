@@ -3,12 +3,29 @@ const { readFileSync, readdirSync } = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
 const TimezoneUnpacker = require('./unpacker');
+const { packZone } = require('./build');
 
 const zeroNames = new Set([
     'Etc/UTC', 'UTC', 'Etc/UCT', 'UCT', 'Etc/Universal', 'Universal',
     'Etc/Zulu', 'Zulu', 'Etc/GMT', 'GMT', 'Etc/GMT0', 'GMT0',
     'Etc/GMT+0', 'GMT+0', 'Etc/GMT-0', 'GMT-0', 'Etc/Greenwich', 'Greenwich'
 ]);
+
+test('the full state and until index ranges survive JSON and decoding', () => {
+    let end = 0;
+    const timeline = Array.from({length: 512}, (_, i) => {
+        end += (i + 1) * 3600000;
+        return {abbr: `S${i % 127}`, offset: 0, dst: 0, until: end};
+    });
+    timeline[511] = {abbr: 'Last', offset: -90, dst: 1, until: Infinity};
+    const packed = JSON.parse(JSON.stringify(packZone('Test/WordLimit', timeline)));
+    const { data } = TimezoneUnpacker.unpackZone(packed);
+    assert.deepEqual(data, timeline.map((entry, i) => ({
+        ...entry,
+        dst: Boolean(entry.dst),
+        from: i ? timeline[i - 1].until : -Infinity
+    })));
+});
 
 for (const family of ['IANA', 'GTZ']) {
     const directory = path.join(__dirname, 'build', family);
