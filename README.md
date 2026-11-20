@@ -17,7 +17,7 @@ When either source releases a new version, this repository's `package.json` is u
 
 The versioning scheme losely follows IANA's versioning, with the year as the major version and the letter as a numeric minor version. The patch version denotes alternate source releases or lesser updates, followed by additional build metadata. For example:
 
-`IANA 2027a` -> `2027.1.0+2027a-iana`
+`IANA 2027a` -> `2027.1.0+2027a-iana`  
 `GTZ 2027a` -> `2027.1.1+2027a-gtz`
 
 
